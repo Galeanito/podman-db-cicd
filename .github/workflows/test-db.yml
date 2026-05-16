@@ -1,0 +1,34 @@
+name: Test con base de datos PostgreSQL
+
+on:
+  push:
+    branches: [ main, principal ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Verificar conexion a PostgreSQL
+        run: |
+          sudo apt-get install -y postgresql-client
+          psql -h localhost -U test -d testdb -c "SELECT version();"
+        env:
+          PGPASSWORD: test
